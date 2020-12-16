@@ -10,12 +10,29 @@ import axios from 'axios';
 const serverUrl = 'http://localhost:3000';
 const client = axios.create({ baseURL: serverUrl });
 
+const CompanyType = new GraphQLObjectType({
+  name: 'Company',
+  fields: {
+    id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    description: { type: GraphQLString },
+  },
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: {
     id: { type: GraphQLString },
     firstName: { type: GraphQLString },
     age: { type: GraphQLInt },
+    company: {
+      type: CompanyType,
+      resolve: async (parentValue, _args) => {
+        const companyId = parentValue.companyId;
+        const resp = await client.get(`/companies/${companyId}`);
+        return resp.data;
+      },
+    },
   },
 });
 
@@ -35,10 +52,24 @@ const RootQuery = new GraphQLObjectType({
         return resp.data;
       },
     },
+
+    company: {
+      type: CompanyType,
+      args: {
+        id: {
+          type: GraphQLString,
+        },
+      },
+      resolve: async (_parentValue, args) => {
+        const path = `${serverUrl}/companies/${args.id}`;
+        const resp = await client.get(path);
+        return resp.data;
+      },
+    },
   },
 });
 
 export const DbSchema = new GraphQLSchema({
-  types: [UserType],
+  types: [UserType, CompanyType],
   query: RootQuery,
 });

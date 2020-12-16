@@ -8,12 +8,28 @@ const graphql_1 = require("graphql");
 const axios_1 = __importDefault(require("axios"));
 const serverUrl = 'http://localhost:3000';
 const client = axios_1.default.create({ baseURL: serverUrl });
+const CompanyType = new graphql_1.GraphQLObjectType({
+    name: 'Company',
+    fields: {
+        id: { type: graphql_1.GraphQLString },
+        name: { type: graphql_1.GraphQLString },
+        description: { type: graphql_1.GraphQLString },
+    },
+});
 const UserType = new graphql_1.GraphQLObjectType({
     name: 'User',
     fields: {
         id: { type: graphql_1.GraphQLString },
         firstName: { type: graphql_1.GraphQLString },
         age: { type: graphql_1.GraphQLInt },
+        company: {
+            type: CompanyType,
+            resolve: async (parentValue, _args) => {
+                const companyId = parentValue.companyId;
+                const resp = await client.get(`/companies/${companyId}`);
+                return resp.data;
+            },
+        },
     },
 });
 const RootQuery = new graphql_1.GraphQLObjectType({
@@ -32,9 +48,22 @@ const RootQuery = new graphql_1.GraphQLObjectType({
                 return resp.data;
             },
         },
+        company: {
+            type: CompanyType,
+            args: {
+                id: {
+                    type: graphql_1.GraphQLString,
+                },
+            },
+            resolve: async (_parentValue, args) => {
+                const path = `${serverUrl}/companies/${args.id}`;
+                const resp = await client.get(path);
+                return resp.data;
+            },
+        },
     },
 });
 exports.DbSchema = new graphql_1.GraphQLSchema({
-    types: [UserType],
+    types: [UserType, CompanyType],
     query: RootQuery,
 });

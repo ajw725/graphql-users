@@ -10,7 +10,7 @@ const app = express_1.default();
 const port = parseInt(process.env.PORT || '4000');
 app.use('/graphql', express_graphql_1.graphqlHTTP({
     graphiql: true,
-    schema: schema_1.dbSchema
+    schema: schema_1.DbSchema,
 }));
 app.listen(port, () => {
     console.log(`Express listening on port ${port}`);

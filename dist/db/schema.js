@@ -1,5 +1,40 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dbSchema = void 0;
+exports.DbSchema = void 0;
 const graphql_1 = require("graphql");
-exports.dbSchema = new graphql_1.GraphQLSchema({});
+const lodash_1 = __importDefault(require("lodash"));
+const users = [
+    { id: '23', firstName: 'Bill', age: 20 },
+    { id: '47', firstName: 'Samantha', age: 21 },
+];
+const UserType = new graphql_1.GraphQLObjectType({
+    name: 'User',
+    fields: {
+        id: { type: graphql_1.GraphQLString },
+        firstName: { type: graphql_1.GraphQLString },
+        age: { type: graphql_1.GraphQLInt },
+    },
+});
+const RootQuery = new graphql_1.GraphQLObjectType({
+    name: 'RootQueryType',
+    fields: {
+        user: {
+            type: UserType,
+            args: {
+                id: {
+                    type: graphql_1.GraphQLString,
+                },
+            },
+            resolve: (_parentValue, args) => {
+                return lodash_1.default.find(users, { id: args.id });
+            },
+        },
+    },
+});
+exports.DbSchema = new graphql_1.GraphQLSchema({
+    types: [UserType],
+    query: RootQuery,
+});

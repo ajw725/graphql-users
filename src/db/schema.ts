@@ -5,11 +5,10 @@ import {
   GraphQLInt,
 } from 'graphql';
 import _ from 'lodash';
+import axios from 'axios';
 
-const users = [
-  { id: '23', firstName: 'Bill', age: 20 },
-  { id: '47', firstName: 'Samantha', age: 21 },
-];
+const serverUrl = 'http://localhost:3000';
+const client = axios.create({ baseURL: serverUrl });
 
 const UserType = new GraphQLObjectType({
   name: 'User',
@@ -30,8 +29,10 @@ const RootQuery = new GraphQLObjectType({
           type: GraphQLString,
         },
       },
-      resolve: (_parentValue, args) => {
-        return _.find(users, { id: args.id });
+      resolve: async (_parentValue, args) => {
+        const path = `${serverUrl}/users/${args.id}`;
+        const resp = await client.get(path);
+        return resp.data;
       },
     },
   },

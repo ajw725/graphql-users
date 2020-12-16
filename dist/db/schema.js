@@ -5,11 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DbSchema = void 0;
 const graphql_1 = require("graphql");
-const lodash_1 = __importDefault(require("lodash"));
-const users = [
-    { id: '23', firstName: 'Bill', age: 20 },
-    { id: '47', firstName: 'Samantha', age: 21 },
-];
+const axios_1 = __importDefault(require("axios"));
+const serverUrl = 'http://localhost:3000';
+const client = axios_1.default.create({ baseURL: serverUrl });
 const UserType = new graphql_1.GraphQLObjectType({
     name: 'User',
     fields: {
@@ -28,8 +26,10 @@ const RootQuery = new graphql_1.GraphQLObjectType({
                     type: graphql_1.GraphQLString,
                 },
             },
-            resolve: (_parentValue, args) => {
-                return lodash_1.default.find(users, { id: args.id });
+            resolve: async (_parentValue, args) => {
+                const path = `${serverUrl}/users/${args.id}`;
+                const resp = await client.get(path);
+                return resp.data;
             },
         },
     },

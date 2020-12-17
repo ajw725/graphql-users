@@ -4,6 +4,7 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLList,
+  GraphQLNonNull,
 } from 'graphql';
 import _ from 'lodash';
 import axios from 'axios';
@@ -77,7 +78,32 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+const RootMutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        age: {
+          type: new GraphQLNonNull(GraphQLInt),
+        },
+        companyId: {
+          type: GraphQLString,
+        },
+      },
+      resolve: async (_parentValue, { firstName, age }) => {
+        const resp = await client.post('/users', { firstName, age });
+        return resp.data;
+      },
+    },
+  },
+});
+
 export const DbSchema = new GraphQLSchema({
   types: [UserType, CompanyType],
   query: RootQuery,
+  mutation: RootMutation,
 });

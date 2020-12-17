@@ -70,7 +70,31 @@ const RootQuery = new graphql_1.GraphQLObjectType({
         },
     },
 });
+const RootMutation = new graphql_1.GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        addUser: {
+            type: UserType,
+            args: {
+                firstName: {
+                    type: new graphql_1.GraphQLNonNull(graphql_1.GraphQLString),
+                },
+                age: {
+                    type: new graphql_1.GraphQLNonNull(graphql_1.GraphQLInt),
+                },
+                companyId: {
+                    type: graphql_1.GraphQLString,
+                },
+            },
+            resolve: async (_parentValue, { firstName, age }) => {
+                const resp = await client.post('/users', { firstName, age });
+                return resp.data;
+            },
+        },
+    },
+});
 exports.DbSchema = new graphql_1.GraphQLSchema({
     types: [UserType, CompanyType],
     query: RootQuery,
+    mutation: RootMutation,
 });

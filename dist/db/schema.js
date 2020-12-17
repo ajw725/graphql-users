@@ -10,11 +10,18 @@ const serverUrl = 'http://localhost:3000';
 const client = axios_1.default.create({ baseURL: serverUrl });
 const CompanyType = new graphql_1.GraphQLObjectType({
     name: 'Company',
-    fields: {
+    fields: () => ({
         id: { type: graphql_1.GraphQLString },
         name: { type: graphql_1.GraphQLString },
         description: { type: graphql_1.GraphQLString },
-    },
+        users: {
+            type: new graphql_1.GraphQLList(UserType),
+            resolve: async (parentValue, _args) => {
+                const resp = await client.get(`/companies/${parentValue.id}/users`);
+                return resp.data;
+            },
+        },
+    }),
 });
 const UserType = new graphql_1.GraphQLObjectType({
     name: 'User',

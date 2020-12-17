@@ -3,6 +3,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
+  GraphQLList,
 } from 'graphql';
 import _ from 'lodash';
 import axios from 'axios';
@@ -10,16 +11,23 @@ import axios from 'axios';
 const serverUrl = 'http://localhost:3000';
 const client = axios.create({ baseURL: serverUrl });
 
-const CompanyType = new GraphQLObjectType({
+const CompanyType: GraphQLObjectType = new GraphQLObjectType({
   name: 'Company',
-  fields: {
+  fields: () => ({
     id: { type: GraphQLString },
     name: { type: GraphQLString },
     description: { type: GraphQLString },
-  },
+    users: {
+      type: new GraphQLList(UserType),
+      resolve: async (parentValue, _args) => {
+        const resp = await client.get(`/companies/${parentValue.id}/users`);
+        return resp.data;
+      },
+    },
+  }),
 });
 
-const UserType = new GraphQLObjectType({
+const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: {
     id: { type: GraphQLString },

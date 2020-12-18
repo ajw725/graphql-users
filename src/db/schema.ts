@@ -94,9 +94,46 @@ const RootMutation = new GraphQLObjectType({
           type: GraphQLString,
         },
       },
-      resolve: async (_parentValue, { firstName, age }) => {
-        const resp = await client.post('/users', { firstName, age });
+      resolve: async (_parentValue, { firstName, age, companyId }) => {
+        const resp = await client.post('/users', { firstName, age, companyId });
         return resp.data;
+      },
+    },
+    updateUser: {
+      type: UserType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        firstName: {
+          type: GraphQLString,
+        },
+        age: {
+          type: GraphQLInt,
+        },
+        companyId: {
+          type: GraphQLString,
+        },
+      },
+      resolve: async (_parentValue, { id, firstName, age, companyId }) => {
+        const resp = await client.patch(`/users/${id}`, {
+          firstName,
+          age,
+          companyId,
+        });
+        return resp.data;
+      },
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (_parentValue, { id }) => {
+        await client.delete(`/users/${id}`);
+        return { id };
       },
     },
   },

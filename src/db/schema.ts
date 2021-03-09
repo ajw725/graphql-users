@@ -75,6 +75,15 @@ const RootQuery = new GraphQLObjectType({
         return resp.data;
       },
     },
+
+    companies: {
+      type: new GraphQLList(CompanyType),
+      resolve: async () => {
+        const path = `${serverUrl}/companies`;
+        const resp = await client.get(path);
+        return resp.data;
+      }
+    }
   },
 });
 
